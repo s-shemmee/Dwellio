@@ -14,7 +14,11 @@ export interface PropertyProps {
     occupants: string;
   };
   image: string;
+  images?: string[];
   discount: string;
+  description?: string;
+  amenities?: string[];
+  reviews?: { id: number; comment: string }[];
 }
 
 export interface CardProps {

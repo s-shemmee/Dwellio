@@ -12,7 +12,7 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container p-6 mx-auto">
       <div className="grid grid-cols-2 gap-6">
         <BookingForm />
         <OrderSummary bookingDetails={bookingDetails} />

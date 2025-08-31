@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Quicksand, Oxygen } from 'next/font/google';
 import Layout from '@/components/layout/Layout';
 import Hero from '@/components/Hero';
 import Pill from '@/components/common/Pill';
 import Card from '@/components/common/Card';
-import { PROPERTYLISTINGSAMPLE } from '@/constants/index';
+import axios from 'axios';
+import { PropertyProps } from '@/interfaces/index';
 
 const quicksand = Quicksand({
   variable: '--font-quicksand',
@@ -35,9 +36,26 @@ export default function Home() {
   const [selected, setSelected] = useState<string | null>('All');
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [properties, setProperties] = useState<PropertyProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await axios.get('/api/properties');
+        setProperties(response.data);
+      } catch {
+        setError('Failed to fetch properties.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
+  }, []);
 
   // Filter properties based on selected category
-  const filteredProperties = PROPERTYLISTINGSAMPLE.filter(property => {
+  const filteredProperties = properties.filter(property => {
     if (selected === 'All') {
       return true;
     }
@@ -45,16 +63,23 @@ export default function Home() {
       return property.rating >= 4.9;
     }
     if (selected === 'Self CheckIn') {
-      return property.category.includes('Self Checkin');
+      return property.category?.includes('Self Checkin');
     }
     if (selected === 'pet friendly') {
-      return property.category.includes('Pet Friendly');
+      return property.category?.includes('Pet Friendly');
     }
     if (selected === 'Instant Book') {
-      return property.category.includes('Instant Book');
+      return property.category?.includes('Instant Book');
     }
-    return selected ? property.category.includes(selected) : false;
+    return selected ? property.category?.includes(selected) : false;
   });
+
+  if (loading) {
+    return <p className="py-10 text-center">Loading...</p>;
+  }
+  if (error) {
+    return <p className="py-10 text-center text-red-500">{error}</p>;
+  }
 
   return (
     <div className={`${quicksand.variable} ${oxygen.variable} bg-gray-50`}>
@@ -92,7 +117,7 @@ export default function Home() {
           {/* Cards */}
           <div className="grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProperties.map((property, index) => (
-              <Card key={index} property={property} />
+              <Card key={property.name || index} property={property} />
             ))}
           </div>
         </div>
