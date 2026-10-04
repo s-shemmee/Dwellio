@@ -1,16 +1,40 @@
 import React from 'react';
 import { ButtonProps } from '@/interfaces';
 
-const Button: React.FC<ButtonProps> = ({ text, onClick, variant = 'primary' }) => {
-  const baseStyles = 'px-4 py-2 rounded font-semibold focus:outline-none';
+interface ExtendedButtonProps extends ButtonProps {
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+}
+
+const Button: React.FC<ExtendedButtonProps> = ({
+  text,
+  onClick,
+  variant = 'primary',
+  type = 'button',
+  disabled = false,
+  isLoading = false,
+  loadingText = 'Please wait…',
+}) => {
+  const baseStyles =
+    'px-4 py-2 rounded-full font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2';
+
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-300 text-gray-800 hover:bg-gray-400',
+    primary: 'bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-teal-600',
+    secondary:
+      'bg-black/80 text-white hover:bg-black focus-visible:ring-black',
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]}`} onClick={onClick}>
-      {text}
+    <button
+      type={type}
+      className={`${baseStyles} ${variants[variant]}`}
+      onClick={onClick}
+      disabled={disabled || isLoading}
+      aria-disabled={disabled || isLoading}
+    >
+      {isLoading ? loadingText : text}
     </button>
   );
 };
