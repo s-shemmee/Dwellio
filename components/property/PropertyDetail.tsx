@@ -5,6 +5,7 @@ import { PropertyProps } from '@/interfaces/index';
 import { slugify } from '@/utils/slugify';
 import BookingSection from '@/components/property/BookingSection';
 import ReviewSection from './ReviewSection';
+import Avatar from '@/components/common/Avatar';
 
 interface PropertyDetailProps {
   property: PropertyProps;
@@ -595,13 +596,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
 
             {property.host ? (
               <div className="flex items-start gap-4">
-                <div className="relative w-16 h-16 overflow-hidden rounded-full shrink-0">
-                  <SafeImage
-                    src={property.host.avatar}
-                    alt={`Portrait of ${property.host.name}`}
-                    sizes="64px"
-                  />
-                </div>
+                <Avatar src={property.host.avatar} name={property.host.name} size={64} />
 
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
