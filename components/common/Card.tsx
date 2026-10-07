@@ -13,11 +13,6 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ property }) => {
   const { name, address, rating, category, price, offers, image, discount } = property;
 
-  // TODO: this is a placeholder identifier strategy. Deriving a slug from
-  // the display name at render time breaks on duplicate names and doesn't
-  // strip special characters (apostrophes, accents, slashes). Once the
-  // Mongo schema exists, this should use a real _id or a stored, unique
-  // slug field instead of re-deriving one here.
   const slug = name.replace(/\s+/g, '-').toLowerCase();
 
   const hasRating = typeof rating === 'number' && !Number.isNaN(rating);
