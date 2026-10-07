@@ -1,3 +1,21 @@
+export interface Host {
+  name: string;
+  avatar?: string;
+  bio?: string;
+  hostingSince?: string;
+}
+
+export interface Review {
+  id: number | string;
+  comment: string;
+  author?: string;
+  avatar?: string;
+  yearsOnPlatform?: number;
+  date?: string;
+  tripType?: string;
+  rating?: number;
+}
+
 export interface PropertyProps {
   name: string;
   address: {
@@ -18,7 +36,10 @@ export interface PropertyProps {
   discount: string;
   description?: string;
   amenities?: string[];
-  reviews?: { id: number; comment: string }[];
+  reviews?: Review[];
+  reviewCount?: number;
+  publishedAt?: string;
+  host?: Host;
 }
 
 export interface CardProps {

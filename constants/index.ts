@@ -1,6 +1,6 @@
-import { PropertyProps } from '@/interfaces/index';
+import { withDetails } from './propertyDetails';
 
-export const PROPERTYLISTINGSAMPLE: PropertyProps[] = [
+const BASE_PROPERTIES: PropertyProps[] = [
   {
     name: 'Villa Ocean Breeze',
     address: {
@@ -289,76 +289,6 @@ export const PROPERTYLISTINGSAMPLE: PropertyProps[] = [
     image: '/assets/images/property16.png',
     discount: '25',
   },
-  {
-    name: 'Riverfront Mansion',
-    address: {
-      state: 'Paris',
-      city: 'Île-de-France',
-      country: 'France',
-    },
-    rating: 4.86,
-    category: ['Riverfront', 'Private Garden', 'Self Checkin'],
-    price: 5000,
-    offers: {
-      bed: '4',
-      shower: '3',
-      occupants: '6-8',
-    },
-    image: 'https://placehold.co/400x300.png',
-    discount: '30',
-  },
-  {
-    name: 'Ski Chalet',
-    address: {
-      state: 'Zermatt',
-      city: 'Valais',
-      country: 'Switzerland',
-    },
-    rating: 4.75,
-    category: ['Mountain View', 'Ski Access', 'Fireplace'],
-    price: 3900,
-    offers: {
-      bed: '3',
-      shower: '3',
-      occupants: '4-5',
-    },
-    image: 'https://placehold.co/400x300.png',
-    discount: '',
-  },
-  {
-    name: 'Island Paradise Villa',
-    address: {
-      state: 'Mahe',
-      city: 'Victoria',
-      country: 'Seychelles',
-    },
-    rating: 4.98,
-    category: ['Beachfront', 'Private Pool', 'Chef Service'],
-    price: 6500,
-    offers: {
-      bed: '5',
-      shower: '5',
-      occupants: '8-10',
-    },
-    image: 'https://placehold.co/400x300.png',
-    discount: '60',
-  },
-  {
-    name: 'Clifftop Retreat',
-    address: {
-      state: 'Cape Town',
-      city: 'Western Cape',
-      country: 'South Africa',
-    },
-    rating: 4.78,
-    category: ['Ocean View', 'Private Pool', 'Self Checkin'],
-    price: 4100,
-    offers: {
-      bed: '3',
-      shower: '3',
-      occupants: '4-5',
-    },
-    image: 'https://placehold.co/400x300.png',
-    discount: '',
-  },
 ];
+
+export const PROPERTYLISTINGSAMPLE = BASE_PROPERTIES.map(withDetails);
