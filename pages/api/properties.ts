@@ -1,7 +1,6 @@
 import { PROPERTYLISTINGSAMPLE } from '@/constants/index';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Add default values for missing fields to each property
 const properties = PROPERTYLISTINGSAMPLE.map(property => ({
   ...property,
   images: property.images || [property.image],
