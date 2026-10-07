@@ -1,35 +1,36 @@
 @import 'tailwindcss';
-@import '@fontsource/quicksand/400.css';
-@import '@fontsource/oxygen/400.css';
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Quicksand', sans-serif;
-  --font-oxygen: 'Oxygen', sans-serif;
+@plugin 'tailwind-scrollbar-hide';
+@theme inline {
+  --font-sans: var(--next-quicksand), ui-sans-serif, system-ui, sans-serif;
+  --font-quicksand: var(--next-quicksand), ui-sans-serif, system-ui, sans-serif;
+  --font-oxygen: var(--next-oxygen), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ebebeb;
-    --foreground: #0a0a0a;
+
+@theme {
+  --color-brand: #2f9478;
+  --color-brand-dark: #1f7a63;
+  --color-brand-darker: #19634f;
+}
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
-}
-
-::-webkit-scrollbar {
-  display: none;
-}
-::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
 }

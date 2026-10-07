@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Quicksand, Oxygen } from 'next/font/google';
-import Layout from '@/components/layout/Layout';
 import Hero from '@/components/Hero';
 import Pill from '@/components/common/Pill';
 import Card from '@/components/common/Card';
@@ -11,26 +9,12 @@ import Dropdown from '@/components/common/Dropdown';
 import axios from 'axios';
 import { PropertyProps } from '@/interfaces/index';
 
-const quicksand = Quicksand({
-  variable: '--font-quicksand',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const oxygen = Oxygen({
-  variable: '--font-oxygen',
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['300', '400', '700'],
-});
-
 const filters = [
   'All',
   'Top Villa',
   'Free Reschedule',
   'Book Now, Pay Later',
   'Self CheckIn',
-  'pet friendly',
   'Instant Book',
 ];
 
@@ -98,8 +82,7 @@ export default function Home() {
     sortOptions.find((opt) => opt.value === sortOption)?.label ?? 'Recommended';
 
   return (
-    <div className={`${quicksand.variable} ${oxygen.variable} bg-gray-50`}>
-      <Layout>
+    <div className="bg-gray-50">
         <Hero />
         <div className="container px-4 mx-auto sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-0">
           <div className="flex flex-col mt-8 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -138,7 +121,7 @@ export default function Home() {
                 </Dropdown>
               </div>
 
-              {/* Sort dropdown — fully functional. */}
+              {/* Sort dropdown */}
               <div className="relative">
                 <Pill
                   label={`Sorted by: ${currentSortLabel}`}
@@ -215,7 +198,6 @@ export default function Home() {
             </div>
           )}
         </div>
-      </Layout>
     </div>
   );
 }
