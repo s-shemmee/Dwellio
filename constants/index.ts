@@ -1,4 +1,5 @@
 import { withDetails } from './propertyDetails';
+import type { PropertyProps } from '@/interfaces/index';
 
 const BASE_PROPERTIES: PropertyProps[] = [
   {
