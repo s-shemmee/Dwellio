@@ -1,21 +1,18 @@
-import { PROPERTYLISTINGSAMPLE } from '@/constants/index';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { listProperties } from '@/lib/properties';
 
-const properties = PROPERTYLISTINGSAMPLE.map(property => ({
-  ...property,
-  images: property.images || [property.image],
-  description: property.description || 'No description available.',
-  amenities: property.amenities || ['WiFi', 'Pool', 'Parking'],
-  reviews: property.reviews || [
-    { id: 1, comment: 'Great place!' },
-    { id: 2, comment: 'Would stay again.' },
-  ],
-}));
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    res.status(200).json(properties);
-  } else {
-    res.status(405).json({ message: 'Method Not Allowed' });
+  try {
+    const properties = await listProperties();
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    return res.status(200).json(properties);
+  } catch (err) {
+    console.error('GET /api/properties failed:', err);
+    return res.status(500).json({ message: 'Something went wrong. Please try again.' });
   }
 }

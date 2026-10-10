@@ -4,7 +4,7 @@ import Link from 'next/link';
 import BookingForm from '@/components/booking/BookingForm';
 import OrderSummary from '@/components/booking/OrderSummary';
 import CancellationPolicy from '@/components/booking/CancellationPolicy';
-import { findPropertyBySlug } from '@/utils/properties';
+import { findPropertyBySlug } from '@/lib/properties';
 import { slugify } from '@/utils/slugify';
 import { calculateQuote, countNights, MAX_NIGHTS, Quote } from '@/utils/pricing';
 
@@ -21,7 +21,7 @@ interface BookingPageProps {
 }
 
 export const getServerSideProps: GetServerSideProps<BookingPageProps> = async ({ query }) => {
-  const property = findPropertyBySlug(query.propertyId);
+  const property = await findPropertyBySlug(query.propertyId);
   if (!property) return { notFound: true };
 
   const propertyId = slugify(property.name); 
