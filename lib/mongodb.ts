@@ -12,10 +12,10 @@ export const getClient = (): Promise<MongoClient> => {
   }
  
   if (process.env.NODE_ENV === 'development') {
-    global.__mongoClientPromise ??= new MongoClient(uri).connect();
+    global.__mongoClientPromise ??= new MongoClient(uri, { serverSelectionTimeoutMS: 8000 }).connect();
     return global.__mongoClientPromise;
   }
   // Production: module scope is reused between requests on a warm server.
-  global.__mongoClientPromise ??= new MongoClient(uri).connect();
+  global.__mongoClientPromise ??= new MongoClient(uri, { serverSelectionTimeoutMS: 8000 }).connect();
   return global.__mongoClientPromise;
 };
