@@ -41,6 +41,7 @@ export interface BookingDoc {
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: Date;
   expiresAt?: Date;
+  paymentIntentId?: string;
 }
 
 /* ------------------------------- indexes -------------------------------- */

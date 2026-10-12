@@ -1,10 +1,23 @@
 import React, { useId, useState } from 'react';
+import { useRouter } from 'next/router';
 import axios from 'axios';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
+  Elements,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 
 interface BookingFormProps {
   booking: { propertyId: string; checkIn: string; checkOut: string };
   children?: React.ReactNode;
 }
+
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 const SMS_OPT_IN_DEFAULT = false;
 
@@ -23,9 +36,6 @@ interface Values {
   email: string;
   phoneNumber: string;
   smsUpdates: boolean;
-  cardNumber: string;
-  expirationDate: string;
-  cvv: string;
   streetAddress: string;
   apartment: string;
   city: string;
@@ -42,9 +52,6 @@ const initialValues: Values = {
   email: '',
   phoneNumber: '',
   smsUpdates: SMS_OPT_IN_DEFAULT,
-  cardNumber: '',
-  expirationDate: '',
-  cvv: '',
   streetAddress: '',
   apartment: '',
   city: '',
@@ -53,30 +60,16 @@ const initialValues: Values = {
   country: '',
 };
 
+// Visual order, used to focus the first invalid field.
 const FIELD_ORDER: (keyof Values)[] = [
   'firstName', 'lastName', 'email', 'phoneNumber',
-  'cardNumber', 'expirationDate', 'cvv',
   'streetAddress', 'apartment', 'city', 'state', 'zipCode', 'country',
 ];
 
 /* ------------------------------ validation ------------------------------ */
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE = /^\+?[0-9\s().-]{7,20}$/;
-const luhn = (digits: string) => {
-  let sum = 0;
-  let double = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let n = Number(digits[i]);
-    if (double) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    double = !double;
-  }
-  return sum % 10 === 0;
-};
+const PHONE = /^\+?[0-9\s().-]{7,20}$/; // same rule as /api/bookings
 
 const validate = (v: Values): Errors => {
   const e: Errors = {};
@@ -84,20 +77,6 @@ const validate = (v: Values): Errors => {
   if (!v.lastName.trim()) e.lastName = 'Enter your last name.';
   if (!EMAIL.test(v.email.trim())) e.email = 'Enter a valid email address.';
   if (!PHONE.test(v.phoneNumber.trim())) e.phoneNumber = 'Enter a valid phone number.';
-
-  const digits = v.cardNumber.replace(/\s/g, '');
-  if (digits.length < 13 || digits.length > 19 || !luhn(digits)) {
-    e.cardNumber = 'Enter a valid card number.';
-  }
-
-  const exp = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(v.expirationDate);
-  if (!exp) e.expirationDate = 'Use MM/YY.';
-  else if (new Date(2000 + Number(exp[2]), Number(exp[1]), 1) <= new Date()) {
-    e.expirationDate = 'This card has expired.';
-  }
-
-  if (!/^\d{3,4}$/.test(v.cvv)) e.cvv = 'Enter the 3 or 4 digit code.';
-
   if (!v.streetAddress.trim()) e.streetAddress = 'Enter your street address.';
   if (!v.city.trim()) e.city = 'Enter your city.';
   if (!v.state.trim()) e.state = 'Enter your state.';
@@ -106,13 +85,23 @@ const validate = (v: Values): Errors => {
   return e;
 };
 
-/* ------------------------------ formatting ------------------------------ */
+/* -------------------------------- card ---------------------------------- */
 
-const formatCard = (raw: string) =>
-  raw.replace(/\D/g, '').slice(0, 19).replace(/(.{4})/g, '$1 ').trim();
-const formatExpiry = (raw: string) => {
-  const d = raw.replace(/\D/g, '').slice(0, 4);
-  return d.length >= 3 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+type CardField = 'number' | 'expiry' | 'cvc';
+type CardState = { complete: boolean; error: string };
+type CardEvent = { complete: boolean; error?: { message?: string } };
+
+const CARD_REQUIRED: Record<CardField, string> = {
+  number: 'Enter your card number.',
+  expiry: 'Enter the expiration date.',
+  cvc: 'Enter the security code.',
+};
+
+const elementStyle = {
+  style: {
+    base: { fontSize: '16px', color: '#111827', '::placeholder': { color: '#6b7280' } },
+    invalid: { color: '#b91c1c' },
+  },
 };
 
 /* ------------------------------- fields --------------------------------- */
@@ -147,24 +136,15 @@ interface FieldProps {
   placeholder?: string;
   optional?: boolean;
   variant?: 'stacked' | 'cell';
-  labelExtra?: React.ReactNode;
 }
 
 const TextField: React.FC<FieldProps> = ({
   id, label, value, onChange, onBlur, error, type = 'text', autoComplete, inputMode,
-  maxLength, placeholder, optional, variant = 'stacked', labelExtra,
+  maxLength, placeholder, optional, variant = 'stacked',
 }) => {
   const errorId = `${id}-error`;
   const common = {
-    id,
-    type,
-    value,
-    onChange,
-    onBlur,
-    autoComplete,
-    inputMode,
-    maxLength,
-    placeholder,
+    id, type, value, onChange, onBlur, autoComplete, inputMode, maxLength, placeholder,
     'aria-invalid': Boolean(error),
     'aria-describedby': error ? errorId : undefined,
   };
@@ -173,9 +153,8 @@ const TextField: React.FC<FieldProps> = ({
   if (variant === 'cell') {
     return (
       <div className="px-4 py-2.5 bg-white">
-        <label htmlFor={id} className="flex items-center gap-1.5 text-xs text-gray-600">
+        <label htmlFor={id} className="block text-xs text-gray-600">
           {text}
-          {labelExtra}
         </label>
         <input
           {...common}
@@ -197,7 +176,7 @@ const TextField: React.FC<FieldProps> = ({
       </label>
       <input
         {...common}
-        className={`w-full h-12 px-3 text-gray-900 bg-white border rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:border-teal-700 ${
+        className={`w-full h-12 px-3 text-gray-900 bg-white border rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-dark focus-visible:border-brand-dark ${
           error ? 'border-red-500' : 'border-gray-300'
         }`}
       />
@@ -210,79 +189,178 @@ const TextField: React.FC<FieldProps> = ({
   );
 };
 
+const CardCell: React.FC<{
+  id: string;
+  label: string;
+  error?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}> = ({ id, label, error, icon, children }) => (
+  <div className="px-4 py-2.5 bg-white">
+    <label htmlFor={id} className="flex items-center gap-1.5 text-xs text-gray-600">
+      {label}
+      {icon}
+    </label>
+    <div className="py-1">{children}</div>
+    {error && (
+      <p id={`${id}-error`} className="mt-1 text-xs text-red-700">
+        {error}
+      </p>
+    )}
+  </div>
+);
+
 const groupClasses =
-  'overflow-hidden border border-gray-300 divide-y divide-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-teal-700 focus-within:border-teal-700';
+  'overflow-hidden border border-gray-300 divide-y divide-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-brand-dark focus-within:border-brand-dark';
 
 const sectionClasses = 'pt-8 mt-8 border-t border-gray-200';
 
 /* -------------------------------- form ---------------------------------- */
 
-const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
+const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => {
+  const router = useRouter();
+  const stripe = useStripe();
+  const elements = useElements();
   const idPrefix = useId();
   const id = (name: string) => `${idPrefix}-${name}`;
 
   const [values, setValues] = useState<Values>(initialValues);
   const [errors, setErrors] = useState<Errors>({});
+  const [card, setCard] = useState<Record<CardField, CardState>>({
+    number: { complete: false, error: '' },
+    expiry: { complete: false, error: '' },
+    cvc: { complete: false, error: '' },
+  });
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<{ id: string; total: number } | null>(null);
+  // Kept after a failed payment so "try again" reuses the same held booking.
+  const [session, setSession] = useState<{ reference: string; clientSecret: string } | null>(null);
 
   const setField = (name: TextKey, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev));
   };
 
-  const onText =
-    (name: TextKey, format?: (raw: string) => string) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setField(name, format ? format(e.target.value) : e.target.value);
+  const onText = (name: TextKey) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setField(name, e.target.value);
 
   const onBlur = (name: keyof Values) => () => {
-    if (name !== 'smsUpdates' && !values[name]) return;
+    if (name !== 'smsUpdates' && !values[name]) return; // don't nag while tabbing through
     setErrors((prev) => ({ ...prev, [name]: validate(values)[name] }));
   };
 
-  const fieldProps = (name: TextKey, label: string, format?: (raw: string) => string) => ({
+  const fieldProps = (name: TextKey, label: string) => ({
     id: id(name),
     label,
     value: values[name],
-    onChange: onText(name, format),
+    onChange: onText(name),
     onBlur: onBlur(name),
     error: errors[name],
   });
+
+  const onCard = (field: CardField) => (event: CardEvent) =>
+    setCard((prev) => ({
+      ...prev,
+      [field]: { complete: event.complete, error: event.error?.message ?? '' },
+    }));
+
+  const focusCard = (field: CardField) => {
+    if (!elements) return;
+    const target =
+      field === 'number'
+        ? elements.getElement(CardNumberElement)
+        : field === 'expiry'
+          ? elements.getElement(CardExpiryElement)
+          : elements.getElement(CardCvcElement);
+    target?.focus();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
+    if (!stripe || !elements) {
+      setFormError('The payment form is still loading. Please try again in a moment.');
+      return;
+    }
+
     const found = validate(values);
     const firstInvalid = FIELD_ORDER.find((key) => found[key]);
-    if (firstInvalid) {
+    const incomplete = (['number', 'expiry', 'cvc'] as const).filter((f) => !card[f].complete);
+
+    if (firstInvalid || incomplete.length > 0) {
       setErrors(found);
-      document.getElementById(id(firstInvalid))?.focus();
+      setCard((prev) => {
+        const next = { ...prev };
+        incomplete.forEach((f) => {
+          next[f] = { ...prev[f], error: prev[f].error || CARD_REQUIRED[f] };
+        });
+        return next;
+      });
+      if (firstInvalid) document.getElementById(id(firstInvalid))?.focus();
+      else focusCard(incomplete[0]);
       return;
     }
 
     setLoading(true);
+    let redirected = false;
     try {
-      const { data } = await axios.post('/api/bookings', {
-        ...booking,
-        firstName: values.firstName.trim(),
-        lastName: values.lastName.trim(),
-        email: values.email.trim(),
-        phoneNumber: values.phoneNumber.trim(),
-        smsUpdates: values.smsUpdates,
-        streetAddress: values.streetAddress.trim(),
-        apartment: values.apartment.trim(),
-        city: values.city.trim(),
-        state: values.state.trim(),
-        zipCode: values.zipCode.trim(),
-        country: values.country,
+      // 1. Server holds the dates and creates the payment (once per attempt chain).
+      let current = session;
+      if (!current) {
+        const { data } = await axios.post('/api/bookings', {
+          ...booking,
+          firstName: values.firstName.trim(),
+          lastName: values.lastName.trim(),
+          email: values.email.trim(),
+          phoneNumber: values.phoneNumber.trim(),
+          smsUpdates: values.smsUpdates,
+          streetAddress: values.streetAddress.trim(),
+          apartment: values.apartment.trim(),
+          city: values.city.trim(),
+          state: values.state.trim(),
+          zipCode: values.zipCode.trim(),
+          country: values.country,
+        });
+        current = { reference: data.booking.id, clientSecret: data.booking.clientSecret };
+        setSession(current);
+      }
+
+      // 2. The card goes from Stripe's iframe straight to Stripe, never to us.
+      const cardElement = elements.getElement(CardNumberElement);
+      if (!cardElement) throw new Error('Card field is missing.');
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(current.clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: `${values.firstName.trim()} ${values.lastName.trim()}`,
+            email: values.email.trim(),
+            phone: values.phoneNumber.trim(),
+            address: {
+              line1: values.streetAddress.trim(),
+              line2: values.apartment.trim() || undefined,
+              city: values.city.trim(),
+              state: values.state.trim(),
+              postal_code: values.zipCode.trim(),
+            },
+          },
+        },
       });
-      setConfirmation({ id: data.booking.id, total: data.booking.quote.total });
-      setValues(initialValues);
+
+      if (error) {
+        setFormError(error.message ?? 'Your payment could not be completed.');
+        return;
+      }
+
+      if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
+        redirected = true;
+        await router.push(`/booking/confirmation?reference=${encodeURIComponent(current.reference)}`);
+        return;
+      }
+      setFormError('Your payment was not completed. Please try again.');
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 400 && err.response.data) {
+      if (axios.isAxiosError(err) && err.response?.data && typeof err.response.data.message === 'string') {
         const serverErrors = (err.response.data.errors ?? {}) as Record<string, string>;
         const fieldErrors: Errors = {};
         (Object.keys(initialValues) as (keyof Values)[]).forEach((key) => {
@@ -290,30 +368,15 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
         });
         setErrors(fieldErrors);
         setFormError(
-          Object.keys(fieldErrors).length === 0 ? err.response.data.message : 'Please fix the highlighted fields.',
+          Object.keys(fieldErrors).length > 0 ? 'Please fix the highlighted fields.' : err.response.data.message,
         );
       } else {
         setFormError('We couldn’t submit your booking. Please check your details and try again.');
       }
     } finally {
-      setLoading(false);
+      if (!redirected) setLoading(false);
     }
   };
-
-  if (confirmation) {
-    return (
-      <div role="status" className="p-6 border border-green-200 rounded-lg bg-green-50">
-        <h2 className="text-xl font-semibold text-green-900">Booking confirmed!</h2>
-        <p className="mt-2 text-green-900">
-          Your total is ${confirmation.total.toLocaleString('en-US')}. A confirmation will be sent to
-          your email.
-        </p>
-        <p className="mt-2 text-sm text-green-900">
-          Reference: <span className="font-mono">{confirmation.id}</span>
-        </p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -336,7 +399,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
             type="checkbox"
             checked={values.smsUpdates}
             onChange={(e) => setValues((prev) => ({ ...prev, smsUpdates: e.target.checked }))}
-            className="w-5 h-5 mt-0.5 accent-teal-700 shrink-0"
+            className="w-5 h-5 mt-0.5 accent-brand-dark shrink-0"
           />
           <span>Receive text message updates about your booking. Message rates may apply.</span>
         </label>
@@ -346,7 +409,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
       <fieldset className={sectionClasses}>
         <legend className="mb-1 text-2xl font-semibold text-gray-900">Pay with</legend>
         <p className="mb-4 text-sm text-gray-600">
-          Demo project: no real payment is processed, and card details are never sent or stored.
+          Test mode: no real money moves. Use card <span className="font-mono">4242 4242 4242 4242</span>,
+          any future expiry and any 3-digit code.
         </p>
 
         <div className="relative mb-4">
@@ -356,7 +420,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
           <select
             id={id('method')}
             defaultValue="card"
-            className="w-full pl-4 pr-12 text-lg text-gray-700 bg-white border border-gray-300 rounded-lg appearance-none h-14 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
+            className="w-full pl-4 pr-12 text-lg text-gray-700 bg-white border border-gray-300 rounded-lg appearance-none h-14 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-dark"
           >
             <option value="card">Credit or debit card</option>
           </select>
@@ -364,14 +428,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
         </div>
 
         <div className={groupClasses}>
-          <TextField
-            {...fieldProps('cardNumber', 'Card number', formatCard)}
-            variant="cell"
-            inputMode="numeric"
-            autoComplete="cc-number"
-            maxLength={23}
-            placeholder="1234 5678 9012 3456"
-            labelExtra={
+          <CardCell
+            id={id('cardNumber')}
+            label="Card number"
+            error={card.number.error}
+            icon={
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -382,23 +443,28 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
                 <path d="M17 9V7a5 5 0 00-10 0v2H5v12h14V9h-2zm-8-2a3 3 0 016 0v2H9V7z" />
               </svg>
             }
-          />
+          >
+            <CardNumberElement
+              id={id('cardNumber')}
+              options={{ ...elementStyle, showIcon: true, placeholder: '1234 1234 1234 1234' }}
+              onChange={onCard('number')}
+            />
+          </CardCell>
           <div className="grid grid-cols-2 divide-x divide-gray-300">
-            <TextField
-              {...fieldProps('expirationDate', 'Expiration date', formatExpiry)}
-              variant="cell"
-              inputMode="numeric"
-              autoComplete="cc-exp"
-              maxLength={5}
-              placeholder="MM/YY"
-            />
-            <TextField
-              {...fieldProps('cvv', 'CVV', (raw) => raw.replace(/\D/g, '').slice(0, 4))}
-              variant="cell"
-              inputMode="numeric"
-              autoComplete="cc-csc"
-              maxLength={4}
-            />
+            <CardCell id={id('cardExpiry')} label="Expiration date" error={card.expiry.error}>
+              <CardExpiryElement
+                id={id('cardExpiry')}
+                options={{ ...elementStyle, placeholder: 'MM / YY' }}
+                onChange={onCard('expiry')}
+              />
+            </CardCell>
+            <CardCell id={id('cardCvc')} label="CVV" error={card.cvc.error}>
+              <CardCvcElement
+                id={id('cardCvc')}
+                options={{ ...elementStyle, placeholder: 'CVC' }}
+                onChange={onCard('cvc')}
+              />
+            </CardCell>
           </div>
         </div>
       </fieldset>
@@ -465,7 +531,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
         </div>
       </fieldset>
 
-      {/* Cancellation policy */}
       {children}
 
       <div className="pt-8 mt-8 border-t border-gray-200">
@@ -476,14 +541,30 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, children }) => {
         )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !stripe}
           aria-busy={loading}
-          className="w-full px-8 py-3.5 text-lg font-medium text-white bg-teal-700 rounded-lg sm:w-auto sm:min-w-72 hover:bg-teal-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-800 focus-visible:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full px-8 py-3.5 text-lg font-medium text-white rounded-lg bg-brand-dark sm:w-auto sm:min-w-72 hover:bg-brand-darker focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-darker focus-visible:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {loading ? 'Processing...' : 'Confirm & pay'}
         </button>
       </div>
     </form>
+  );
+};
+
+const BookingForm: React.FC<BookingFormProps> = (props) => {
+  if (!stripePromise) {
+    return (
+      <p role="alert" className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">
+        Payments aren’t configured: set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in .env.local and restart
+        the dev server.
+      </p>
+    );
+  }
+  return (
+    <Elements stripe={stripePromise}>
+      <BookingFormInner {...props} />
+    </Elements>
   );
 };
 

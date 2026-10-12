@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { findPropertyBySlug } from '@/lib/properties';
-import { createPendingBooking, isRangeAvailable, PENDING_HOLD_MINUTES } from '@/lib/bookings';
+import {
+  attachPaymentIntent,
+  createPendingBooking,
+  deleteBooking,
+  isRangeAvailable,
+  newReference,
+} from '@/lib/bookings';
+import { getStripe } from '@/lib/stripe';
 import { calculateQuote, countNights, MAX_NIGHTS } from '@/utils/pricing';
 
 type FieldErrors = Record<string, string>;
@@ -87,7 +94,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       discountPercent: Number(property.discount) || 0,
     });
 
-    const booking = await createPendingBooking({
+    // 1. Hold the dates.
+    const reference = newReference();
+    await createPendingBooking({
+      reference,
       propertySlug: property.slug,
       checkIn,
       checkOut,
@@ -97,18 +107,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       quote,
     });
 
-    return res.status(201).json({
-      message: `Dates held for ${PENDING_HOLD_MINUTES} minutes.`,
-      booking: {
-        id: booking.reference,
-        propertyName: property.name,
-        checkIn,
-        checkOut,
-        quote,
-      },
-    });
+    // 2. Ask Stripe for a payment of exactly the server-computed total.
+    try {
+      const paymentIntent = await getStripe().paymentIntents.create(
+        {
+          amount: Math.round(quote.total * 100),
+          currency: 'usd',
+          automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+          receipt_email: guest.email,
+          description: `${property.name}, ${checkIn} to ${checkOut}`,
+          metadata: { reference, propertySlug: property.slug },
+        },
+        { idempotencyKey: `booking-${reference}` },
+      );
+      await attachPaymentIntent(reference, paymentIntent.id);
+
+      return res.status(201).json({
+        message: 'Booking started.',
+        booking: {
+          id: reference,
+          clientSecret: paymentIntent.client_secret,
+          propertyName: property.name,
+          checkIn,
+          checkOut,
+          quote,
+        },
+      });
+    } catch (err) {
+      await deleteBooking(reference);
+      console.error('Creating the PaymentIntent failed:', err instanceof Error ? err.message : err);
+      return res.status(502).json({ message: 'We couldn’t start the payment. Please try again.' });
+    }
   } catch (err) {
-    console.error('POST /api/bookings failed:', err); // message only; never log the body
+    console.error('POST /api/bookings failed:', err);
     return res.status(500).json({ message: 'We couldn’t process your booking. Please try again.' });
   }
 }
