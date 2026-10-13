@@ -183,8 +183,6 @@ Contributions are welcome, and the roadmap above is a good place to start.
    ```
 6. Open a pull request describing what changed and why.
 
-Please do not commit secrets. `.env.local` is git-ignored; only `.env.example` with placeholder values belongs in the repository.
-
 ## License
 
 Distributed under the terms of the license in [LICENSE](./LICENSE).
