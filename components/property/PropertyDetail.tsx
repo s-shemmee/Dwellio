@@ -71,10 +71,7 @@ const SafeImage: React.FC<{
   );
 };
 
-const Icon: React.FC<{ path: string; className?: string }> = ({
-  path,
-  className,
-}) => (
+const Icon: React.FC<{ path: string; className?: string }> = ({ path, className }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -103,9 +100,7 @@ const ICONS = {
   user: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z',
 };
 
-const PropertyDetail: React.FC<PropertyDetailProps> = ({
-  property: rawProperty,
-}) => {
+const PropertyDetail: React.FC<PropertyDetailProps> = ({ property: rawProperty }) => {
   const property = rawProperty;
 
   const [activeSection, setActiveSection] = useState('description');
@@ -118,26 +113,23 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
     if (typeof IntersectionObserver === 'undefined') return;
 
     const els = sections
-      .map((section) => document.getElementById(section.id))
+      .map(section => document.getElementById(section.id))
       .filter((el): el is HTMLElement => el !== null);
 
     if (els.length === 0) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const topMost = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) =>
-              a.boundingClientRect.top - b.boundingClientRect.top,
-          )[0];
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
 
         if (topMost) setActiveSection(topMost.target.id);
       },
-      { rootMargin: '-20% 0px -60% 0px' },
+      { rootMargin: '-20% 0px -60% 0px' }
     );
 
-    els.forEach((el) => observer.observe(el));
+    els.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
   }, []);
@@ -155,12 +147,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
         role="alert"
         className="container p-6 mx-auto my-8 text-center text-red-700 border border-red-200 rounded-lg bg-red-50"
       >
-        <p className="font-semibold">
-          We couldn&apos;t load this property.
-        </p>
-        <p className="mt-1 text-sm">
-          Please go back and try again.
-        </p>
+        <p className="font-semibold">We couldn&apos;t load this property.</p>
+        <p className="mt-1 text-sm">Please go back and try again.</p>
       </div>
     );
   }
@@ -177,30 +165,21 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
       }
     } catch (err) {
       if ((err as DOMException)?.name !== 'AbortError') {
-        setStatus(
-          "Couldn't share this page. Copy the link from your address bar.",
-        );
+        setStatus("Couldn't share this page. Copy the link from your address bar.");
       }
     }
   };
 
   const handleSave = () => {
-    setSaved((prev) => !prev);
+    setSaved(prev => !prev);
     setStatus(saved ? 'Removed from saved.' : 'Saved.');
   };
 
   const rating =
-    typeof property.rating === 'number' &&
-    !Number.isNaN(property.rating)
-      ? property.rating
-      : null;
+    typeof property.rating === 'number' && !Number.isNaN(property.rating) ? property.rating : null;
 
-  const allImages = [
-    property.image,
-    ...(property.images ?? []),
-  ].filter(
-    (src, index, array): src is string =>
-      Boolean(src) && array.indexOf(src) === index,
+  const allImages = [property.image, ...(property.images ?? [])].filter(
+    (src, index, array): src is string => Boolean(src) && array.indexOf(src) === index
   );
 
   const mainImage = allImages[0];
@@ -208,7 +187,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   const reusePositions = ['50% 30%', '20% 60%', '80% 60%'];
 
   const secondary = mainImage
-    ? [0, 1, 2].map((index) => ({
+    ? [0, 1, 2].map(index => ({
         src: allImages[index + 1] ?? mainImage,
         reused: !allImages[index + 1],
         position: reusePositions[index],
@@ -219,11 +198,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   const description = property.description?.trim();
   const isLongDescription = (description?.length ?? 0) > 400;
 
-  const location = [
-    property.address?.city,
-    property.address?.state,
-    property.address?.country,
-  ]
+  const location = [property.address?.city, property.address?.state, property.address?.country]
     .filter(Boolean)
     .join(', ');
 
@@ -253,17 +228,12 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
     <div className="container p-4 mx-auto lg:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div className="min-w-0">
-          <h1 className="mb-2 text-2xl font-bold text-gray-900 lg:text-4xl">
-            {property.name}
-          </h1>
+          <h1 className="mb-2 text-2xl font-bold text-gray-900 lg:text-4xl">{property.name}</h1>
 
           <div className="flex flex-wrap items-center text-gray-600 gap-x-5 gap-y-1">
             {rating !== null && (
               <span className="inline-flex items-center gap-1.5">
-                <Icon
-                  path={ICONS.star}
-                  className="w-5 h-5 text-amber-500 fill-amber-500"
-                />
+                <Icon path={ICONS.star} className="w-5 h-5 text-amber-500 fill-amber-500" />
                 <span className="font-semibold text-gray-900">
                   <span className="sr-only">Rated </span>
                   {rating}
@@ -278,20 +248,14 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
 
             {location && (
               <span className="inline-flex items-center gap-1.5">
-                <Icon
-                  path={ICONS.pin}
-                  className="w-4 h-4 text-gray-900"
-                />
+                <Icon path={ICONS.pin} className="w-4 h-4 text-gray-900" />
                 {location}
               </span>
             )}
 
             {property.host?.name && (
               <span className="inline-flex items-center gap-1.5">
-                <Icon
-                  path={ICONS.user}
-                  className="w-4 h-4 text-gray-900"
-                />
+                <Icon path={ICONS.user} className="w-4 h-4 text-gray-900" />
                 <span className="sr-only">Hosted by </span>
                 {property.host.name}
               </span>
@@ -300,36 +264,21 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleSave}
-            aria-pressed={saved}
-            className={actionBtn}
-          >
+          <button type="button" onClick={handleSave} aria-pressed={saved} className={actionBtn}>
             <Icon
               path={ICONS.heart}
-              className={`w-4 h-4 ${
-                saved ? 'fill-red-500 text-red-500' : ''
-              }`}
+              className={`w-4 h-4 ${saved ? 'fill-red-500 text-red-500' : ''}`}
             />
             Save
           </button>
 
-          <button
-            type="button"
-            onClick={handleShare}
-            className={actionBtn}
-          >
+          <button type="button" onClick={handleShare} className={actionBtn}>
             <Icon path={ICONS.share} />
             Share
           </button>
         </div>
 
-        <p
-          role="status"
-          aria-live="polite"
-          className="w-full text-sm text-gray-600 empty:hidden"
-        >
+        <p role="status" aria-live="polite" className="w-full text-sm text-gray-600 empty:hidden">
           {status}
         </p>
       </div>
@@ -378,7 +327,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
       <dialog
         ref={dialogRef}
         aria-label={`All photos of ${property.name}`}
-        onClick={(e) => {
+        onClick={e => {
           if (e.target === e.currentTarget) {
             dialogRef.current?.close();
           }
@@ -398,15 +347,10 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {allImages.map((src, index) => (
-              <div
-                key={src}
-                className="relative overflow-hidden rounded-lg aspect-4/3"
-              >
+              <div key={src} className="relative overflow-hidden rounded-lg aspect-4/3">
                 <SafeImage
                   src={src}
-                  alt={`${property.name}, photo ${
-                    index + 1
-                  } of ${allImages.length}`}
+                  alt={`${property.name}, photo ${index + 1} of ${allImages.length}`}
                   sizes="(max-width: 640px) 100vw, 50vw"
                 />
               </div>
@@ -415,11 +359,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
         </div>
       </dialog>
 
-      <ul
-        className="flex flex-wrap gap-2 mb-8"
-        aria-label="Property summary"
-      >
-        {stats.map((stat) => (
+      <ul className="flex flex-wrap gap-2 mb-8" aria-label="Property summary">
+        {stats.map(stat => (
           <li
             key={stat.label}
             className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-gray-800 border border-gray-300 rounded-full"
@@ -429,11 +370,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
           </li>
         ))}
 
-        {(property.category ?? []).map((category) => (
-          <li
-            key={category}
-            className="px-3 py-1.5 text-xs text-gray-700 bg-gray-100 rounded-full"
-          >
+        {(property.category ?? []).map(category => (
+          <li key={category} className="px-3 py-1.5 text-xs text-gray-700 bg-gray-100 rounded-full">
             {category}
           </li>
         ))}
@@ -446,7 +384,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
             className="flex items-center justify-between gap-6 border-b border-gray-200"
           >
             <ul className="flex gap-6 overflow-x-auto sm:gap-8">
-              {sections.map((section) => {
+              {sections.map(section => {
                 const isActive = activeSection === section.id;
 
                 return (
@@ -489,9 +427,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 <p
                   id="description-text"
                   className={`leading-relaxed text-gray-800 whitespace-pre-line ${
-                    descExpanded || !isLongDescription
-                      ? ''
-                      : 'line-clamp-6'
+                    descExpanded || !isLongDescription ? '' : 'line-clamp-6'
                   }`}
                 >
                   {description}
@@ -500,7 +436,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 {isLongDescription && (
                   <button
                     type="button"
-                    onClick={() => setDescExpanded((value) => !value)}
+                    onClick={() => setDescExpanded(value => !value)}
                     aria-expanded={descExpanded}
                     aria-controls="description-text"
                     className="mt-4 font-medium text-teal-700 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
@@ -510,9 +446,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 )}
               </>
             ) : (
-              <p className="text-gray-600">
-                No description available for this property yet.
-              </p>
+              <p className="text-gray-600">No description available for this property yet.</p>
             )}
           </section>
 
@@ -521,19 +455,14 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
             aria-labelledby="amenities-heading"
             className="py-8 border-t border-gray-200 scroll-mt-[calc(var(--header-height,8rem)+1rem)]"
           >
-            <h2
-              id="amenities-heading"
-              className="mb-2 text-2xl font-semibold text-gray-900"
-            >
+            <h2 id="amenities-heading" className="mb-2 text-2xl font-semibold text-gray-900">
               What this place offers
             </h2>
 
-            {property.amenities &&
-            property.amenities.length > 0 ? (
+            {property.amenities && property.amenities.length > 0 ? (
               <>
                 <p className="mb-6 text-gray-700">
-                  Each home is fully equipped to meet your needs, with
-                  ample space and privacy.
+                  Each home is fully equipped to meet your needs, with ample space and privacy.
                 </p>
 
                 <ul className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
@@ -560,9 +489,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 </ul>
               </>
             ) : (
-              <p className="text-gray-600">
-                No amenities listed for this property yet.
-              </p>
+              <p className="text-gray-600">No amenities listed for this property yet.</p>
             )}
           </section>
 
@@ -587,10 +514,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
             aria-labelledby="host-heading"
             className="py-8 border-t border-gray-200 scroll-mt-[calc(var(--header-height,8rem)+1rem)]"
           >
-            <h2
-              id="host-heading"
-              className="mb-4 text-2xl font-semibold text-gray-900"
-            >
+            <h2 id="host-heading" className="mb-4 text-2xl font-semibold text-gray-900">
               About the host
             </h2>
 
@@ -599,21 +523,13 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 <Avatar src={property.host.avatar} name={property.host.name} size={64} />
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {property.host.name}
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{property.host.name}</h3>
 
                   {property.host.hostingSince && (
-                    <p className="text-gray-600">
-                      {property.host.hostingSince}
-                    </p>
+                    <p className="text-gray-600">{property.host.hostingSince}</p>
                   )}
 
-                  {property.host.bio && (
-                    <p className="mt-2 text-gray-700">
-                      {property.host.bio}
-                    </p>
-                  )}
+                  {property.host.bio && <p className="mt-2 text-gray-700">{property.host.bio}</p>}
                 </div>
               </div>
             ) : (

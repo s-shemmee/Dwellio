@@ -107,7 +107,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ propertyId, totalCount, a
         <span>{error}</span>
         <button
           type="button"
-          onClick={() => setReloadKey((k) => k + 1)}
+          onClick={() => setReloadKey(k => k + 1)}
           className="self-start px-3 py-1.5 text-sm font-medium text-red-800 bg-white border border-red-300 rounded-full hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
         >
           Try again
@@ -121,9 +121,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ propertyId, totalCount, a
   }
 
   // Average only from reviews that carry a numeric rating.
-  const rated = reviews.filter((r) => typeof r.rating === 'number' && !Number.isNaN(r.rating));
+  const rated = reviews.filter(r => typeof r.rating === 'number' && !Number.isNaN(r.rating));
   const computed =
-    rated.length > 0 ? rated.reduce((sum, r) => sum + (r.rating as number), 0) / rated.length : null;
+    rated.length > 0
+      ? rated.reduce((sum, r) => sum + (r.rating as number), 0) / rated.length
+      : null;
   const average =
     typeof averageRating === 'number' && !Number.isNaN(averageRating) ? averageRating : computed;
   const count = totalCount ?? reviews.length;
@@ -151,7 +153,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ propertyId, totalCount, a
       </p>
 
       <ul className="grid grid-cols-1 gap-x-10 gap-y-10 md:grid-cols-2">
-        {reviews.map((review) => {
+        {reviews.map(review => {
           const name = review.author?.trim() || 'Guest';
           const when = formatMonthYear(review.date);
           const years = review.yearsOnPlatform;
