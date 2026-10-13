@@ -23,12 +23,12 @@ The live demo runs in **Stripe test mode**: no real payments are processed, and 
 
 ## Screenshots
 
-| Home                                    | Property detail                                               |
-| --------------------------------------- | ------------------------------------------------------------- |
+| Home                                                    | Property detail                                                               |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | ![Home page](public/assets/images/screenshots/home.png) | ![Property detail page](public/assets/images/screenshots/property-detail.png) |
 
-| Checkout                                        | Confirmation                                               |
-| ----------------------------------------------- | ---------------------------------------------------------- |
+| Checkout                                                        | Confirmation                                                               |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | ![Checkout page](public/assets/images/screenshots/checkout.png) | ![Booking confirmation](public/assets/images/screenshots/confirmation.png) |
 
 ## Features
