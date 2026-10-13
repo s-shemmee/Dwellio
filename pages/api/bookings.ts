@@ -12,7 +12,7 @@ import { calculateQuote, countNights, MAX_NIGHTS } from '@/utils/pricing';
 
 type FieldErrors = Record<string, string>;
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 const PHONE = /^\+?[0-9\s().-]{7,20}$/;
 
 const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       errors.firstName = 'Please enter your first name.';
     if (!guest.lastName || guest.lastName.length > 80)
       errors.lastName = 'Please enter your last name.';
-    if (!EMAIL.test(guest.email) || guest.email.length > 254)
+    if (guest.email.length > 254 || !EMAIL.test(guest.email))
       errors.email = 'Please enter a valid email address.';
     if (!PHONE.test(guest.phoneNumber)) errors.phoneNumber = 'Please enter a valid phone number.';
 
