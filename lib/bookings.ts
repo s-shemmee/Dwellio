@@ -13,7 +13,7 @@ export const isRangeAvailable = async (
   propertySlug: string,
   checkIn: string,
   checkOut: string,
-  excludeReference?: string,
+  excludeReference?: string
 ): Promise<boolean> => {
   const bookings = await bookingsCollection();
   const clash = await bookings.findOne(
@@ -24,13 +24,13 @@ export const isRangeAvailable = async (
       ...(excludeReference ? { reference: { $ne: excludeReference } } : {}),
       $or: [{ status: 'confirmed' }, { status: 'pending', expiresAt: { $gt: new Date() } }],
     },
-    { projection: { _id: 1 } },
+    { projection: { _id: 1 } }
   );
   return clash === null;
 };
 
 export const createPendingBooking = async (
-  data: Omit<BookingDoc, 'status' | 'createdAt' | 'expiresAt' | 'paymentIntentId'>,
+  data: Omit<BookingDoc, 'status' | 'createdAt' | 'expiresAt' | 'paymentIntentId'>
 ): Promise<BookingDoc> => {
   const now = new Date();
   const booking: BookingDoc = {
@@ -66,7 +66,7 @@ const refund = async (paymentIntentId: string) => {
 };
 
 export const confirmPaidBooking = async (
-  paymentIntent: Stripe.PaymentIntent,
+  paymentIntent: Stripe.PaymentIntent
 ): Promise<'confirmed' | 'already-confirmed' | 'refunded'> => {
   const bookings = await bookingsCollection();
   const booking = await bookings.findOne({ paymentIntentId: paymentIntent.id });
@@ -83,12 +83,12 @@ export const confirmPaidBooking = async (
     booking.propertySlug,
     booking.checkIn,
     booking.checkOut,
-    booking.reference,
+    booking.reference
   );
   if (!stillFree) {
     await bookings.updateOne(
       { reference: booking.reference },
-      { $set: { status: 'cancelled' }, $unset: { expiresAt: '' } },
+      { $set: { status: 'cancelled' }, $unset: { expiresAt: '' } }
     );
     await refund(paymentIntent.id);
     return 'refunded';
@@ -96,7 +96,7 @@ export const confirmPaidBooking = async (
 
   await bookings.updateOne(
     { reference: booking.reference, status: 'pending' },
-    { $set: { status: 'confirmed' }, $unset: { expiresAt: '' } },
+    { $set: { status: 'confirmed' }, $unset: { expiresAt: '' } }
   );
   return 'confirmed';
 };

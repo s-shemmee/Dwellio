@@ -18,7 +18,7 @@ export const findPropertyBySlug = async (slug: unknown): Promise<PropertyDoc | n
     .findOne({ slug: slug.toLowerCase() }, noId);
   return doc as unknown as PropertyDoc | null;
 };
- 
+
 export const listReviews = async (slug: string, limit = 4): Promise<Review[]> => {
   const db = await getDb();
   const docs = await db
