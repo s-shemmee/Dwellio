@@ -16,7 +16,7 @@ const AMENITY_ICON_RULES: { file: string; keywords: string[] }[] = [
 export const getAmenityIcon = (amenity: string): string | null => {
   const name = amenity.trim().toLowerCase();
   const rule = AMENITY_ICON_RULES.find(({ keywords }) =>
-    keywords.some((keyword) => name.includes(keyword)),
+    keywords.some(keyword => name.includes(keyword))
   );
   return rule ? `${ICON_DIR}/${rule.file}` : null;
 };
