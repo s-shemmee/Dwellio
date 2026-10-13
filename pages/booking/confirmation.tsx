@@ -56,7 +56,7 @@ export default function BookingConfirmationPage() {
     const load = async () => {
       try {
         const { data } = await axios.get<BookingView>(
-          `/api/bookings/${encodeURIComponent(reference)}`,
+          `/api/bookings/${encodeURIComponent(reference)}`
         );
         if (cancelled) return;
         setState({ kind: 'ready', booking: data });
@@ -68,7 +68,7 @@ export default function BookingConfirmationPage() {
         setState(
           axios.isAxiosError(err) && err.response?.status === 404
             ? { kind: 'not-found' }
-            : { kind: 'error' },
+            : { kind: 'error' }
         );
       }
     };
@@ -108,15 +108,13 @@ export default function BookingConfirmationPage() {
           <div role="alert" className="text-center">
             <h1 className="mb-2 text-2xl font-bold text-gray-900">We couldn’t load your booking</h1>
             <p className="mb-6 text-gray-600">Your payment is safe. Try again in a moment.</p>
-            <button type="button" onClick={() => setReloadKey((k) => k + 1)} className={linkClasses}>
+            <button type="button" onClick={() => setReloadKey(k => k + 1)} className={linkClasses}>
               Try again
             </button>
           </div>
         )}
 
-        {state.kind === 'ready' && (
-          <Details booking={state.booking} />
-        )}
+        {state.kind === 'ready' && <Details booking={state.booking} />}
       </div>
     </>
   );
@@ -145,8 +143,8 @@ function Details({ booking }: { booking: BookingView }) {
 
       {booking.status === 'pending' && (
         <p role="status" className="mb-6 text-gray-700">
-          Your payment went through. We’re finalising the booking, which usually takes a few seconds.
-          This page updates by itself.
+          Your payment went through. We’re finalising the booking, which usually takes a few
+          seconds. This page updates by itself.
         </p>
       )}
       {booking.status === 'cancelled' && (

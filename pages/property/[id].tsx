@@ -34,10 +34,7 @@ const Message: React.FC<{
   action?: React.ReactNode;
   alert?: boolean;
 }> = ({ title, body, action, alert }) => (
-  <div
-    role={alert ? 'alert' : undefined}
-    className="container px-4 py-16 mx-auto text-center"
-  >
+  <div role={alert ? 'alert' : undefined} className="container px-4 py-16 mx-auto text-center">
     <h1 className="mb-2 text-2xl font-bold text-gray-900">{title}</h1>
     <p className="mb-6 text-gray-600">{body}</p>
     {action}
@@ -68,8 +65,8 @@ export default function PropertyDetailPage() {
       .get<PropertyProps>(`/api/properties/${encodeURIComponent(id)}`, {
         signal: controller.signal,
       })
-      .then((res) => setState({ status: 'ready', property: res.data }))
-      .catch((err) => {
+      .then(res => setState({ status: 'ready', property: res.data }))
+      .catch(err => {
         if (axios.isCancel(err)) return;
         if (axios.isAxiosError(err) && err.response?.status === 404) {
           setState({ status: 'not-found' });
@@ -123,11 +120,7 @@ export default function PropertyDetailPage() {
           title="We couldn’t load this property"
           body="Check your connection and try again."
           action={
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={linkClasses}
-            >
+            <button type="button" onClick={() => setReloadKey(k => k + 1)} className={linkClasses}>
               Try again
             </button>
           }

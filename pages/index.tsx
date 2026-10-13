@@ -56,7 +56,7 @@ export default function Home() {
     fetchProperties();
   }, [fetchProperties]);
 
-  const filteredProperties = properties.filter((property) => {
+  const filteredProperties = properties.filter(property => {
     if (selected === 'All') return true;
     if (selected === 'Top Villa') return property.rating >= 4.9;
     if (selected === 'Self CheckIn') return property.category?.includes('Self Checkin');
@@ -79,125 +79,123 @@ export default function Home() {
   })();
 
   const currentSortLabel =
-    sortOptions.find((opt) => opt.value === sortOption)?.label ?? 'Recommended';
+    sortOptions.find(opt => opt.value === sortOption)?.label ?? 'Recommended';
 
   return (
     <div className="bg-gray-50">
-        <Hero />
-        <div className="container px-4 mx-auto sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-0">
-          <div className="flex flex-col mt-8 mb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap gap-2 mb-4 sm:mb-0">
-              {filters.map((filter) => (
-                <Pill
-                  key={filter}
-                  label={filter}
-                  isSelected={selected === filter}
-                  onClick={() => setSelected(filter)}
-                />
-              ))}
+      <Hero />
+      <div className="container px-4 mx-auto sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-0">
+        <div className="flex flex-col mt-8 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2 mb-4 sm:mb-0">
+            {filters.map(filter => (
+              <Pill
+                key={filter}
+                label={filter}
+                isSelected={selected === filter}
+                onClick={() => setSelected(filter)}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 sm:justify-start">
+            <div className="relative">
+              <Pill
+                label="Filter"
+                variant="filter"
+                isSelected={filterMenuOpen}
+                onClick={() => setFilterMenuOpen(prev => !prev)}
+                ariaHasPopup
+                ariaExpanded={filterMenuOpen}
+                ariaControls="filter-dropdown-panel"
+              />
+              <Dropdown
+                id="filter-dropdown-panel"
+                isOpen={filterMenuOpen}
+                onClose={() => setFilterMenuOpen(false)}
+                label="Filter options"
+                align="right"
+              >
+                <p className="px-3 py-2 text-sm text-gray-500">Filter options coming soon.</p>
+              </Dropdown>
             </div>
 
-            <div className="flex items-center justify-end gap-2 sm:justify-start">
-              <div className="relative">
-                <Pill
-                  label="Filter"
-                  variant="filter"
-                  isSelected={filterMenuOpen}
-                  onClick={() => setFilterMenuOpen((prev) => !prev)}
-                  ariaHasPopup
-                  ariaExpanded={filterMenuOpen}
-                  ariaControls="filter-dropdown-panel"
-                />
-                <Dropdown
-                  id="filter-dropdown-panel"
-                  isOpen={filterMenuOpen}
-                  onClose={() => setFilterMenuOpen(false)}
-                  label="Filter options"
-                  align="right"
-                >
-                  <p className="px-3 py-2 text-sm text-gray-500">
-                    Filter options coming soon.
-                  </p>
-                </Dropdown>
-              </div>
-
-              {/* Sort dropdown */}
-              <div className="relative">
-                <Pill
-                  label={`Sorted by: ${currentSortLabel}`}
-                  variant="sort"
-                  isSelected={sortOption !== 'default'}
-                  onClick={() => setSortMenuOpen((prev) => !prev)}
-                  ariaHasPopup
-                  ariaExpanded={sortMenuOpen}
-                  ariaControls="sort-dropdown-panel"
-                />
-                <Dropdown
-                  id="sort-dropdown-panel"
-                  isOpen={sortMenuOpen}
-                  onClose={() => setSortMenuOpen(false)}
-                  label="Sort options"
-                  align="right"
-                >
-                  {sortOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={sortOption === opt.value}
-                      onClick={() => {
-                        setSortOption(opt.value);
-                        setSortMenuOpen(false);
-                      }}
-                      className={`w-full rounded-lg px-3 py-2 text-left text-sm transition
+            {/* Sort dropdown */}
+            <div className="relative">
+              <Pill
+                label={`Sorted by: ${currentSortLabel}`}
+                variant="sort"
+                isSelected={sortOption !== 'default'}
+                onClick={() => setSortMenuOpen(prev => !prev)}
+                ariaHasPopup
+                ariaExpanded={sortMenuOpen}
+                ariaControls="sort-dropdown-panel"
+              />
+              <Dropdown
+                id="sort-dropdown-panel"
+                isOpen={sortMenuOpen}
+                onClose={() => setSortMenuOpen(false)}
+                label="Sort options"
+                align="right"
+              >
+                {sortOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={sortOption === opt.value}
+                    onClick={() => {
+                      setSortOption(opt.value);
+                      setSortMenuOpen(false);
+                    }}
+                    className={`w-full rounded-lg px-3 py-2 text-left text-sm transition
                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600
                         ${
                           sortOption === opt.value
                             ? 'bg-teal-100/50 text-teal-700 font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </Dropdown>
-              </div>
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </Dropdown>
             </div>
           </div>
-
-          <p className="sr-only" role="status" aria-live="polite">
-            {loading
-              ? 'Loading properties…'
-              : `${sortedProperties.length} ${sortedProperties.length === 1 ? 'property' : 'properties'} found`}
-          </p>
-
-          {loading && (
-            <p className="py-10 text-center text-gray-600" role="status" aria-live="polite">
-              Loading properties…
-            </p>
-          )}
-
-          {!loading && error && (
-            <div className="flex flex-col items-center gap-4 py-10 text-center" role="alert">
-              <p className="text-red-500">{error}</p>
-              <Button text="Try again" onClick={fetchProperties} variant="primary" />
-            </div>
-          )}
-
-          {!loading && !error && sortedProperties.length === 0 && (
-            <p className="py-10 text-center text-gray-600">
-              No properties match this filter. Try a different one.
-            </p>
-          )}
-
-          {!loading && !error && sortedProperties.length > 0 && (
-            <div className="grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sortedProperties.map((property, index) => (
-                <Card key={property.name || index} property={property} />
-              ))}
-            </div>
-          )}
         </div>
+
+        <p className="sr-only" role="status" aria-live="polite">
+          {loading
+            ? 'Loading properties…'
+            : `${sortedProperties.length} ${sortedProperties.length === 1 ? 'property' : 'properties'} found`}
+        </p>
+
+        {loading && (
+          <p className="py-10 text-center text-gray-600" role="status" aria-live="polite">
+            Loading properties…
+          </p>
+        )}
+
+        {!loading && error && (
+          <div className="flex flex-col items-center gap-4 py-10 text-center" role="alert">
+            <p className="text-red-500">{error}</p>
+            <Button text="Try again" onClick={fetchProperties} variant="primary" />
+          </div>
+        )}
+
+        {!loading && !error && sortedProperties.length === 0 && (
+          <p className="py-10 text-center text-gray-600">
+            No properties match this filter. Try a different one.
+          </p>
+        )}
+
+        {!loading && !error && sortedProperties.length > 0 && (
+          <div className="grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {sortedProperties.map((property, index) => (
+              <Card key={property.name || index} property={property} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

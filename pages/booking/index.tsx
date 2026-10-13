@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps<BookingPageProps> = async ({
   const property = await findPropertyBySlug(query.propertyId);
   if (!property) return { notFound: true };
 
-  const propertyId = slugify(property.name); 
+  const propertyId = slugify(property.name);
   const backToProperty = {
     redirect: { destination: `/property/${propertyId}`, permanent: false },
   } as const;
