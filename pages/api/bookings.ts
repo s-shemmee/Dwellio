@@ -41,9 +41,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       phoneNumber: text(body.phoneNumber),
       smsUpdates: body.smsUpdates === true,
     };
-    if (!guest.firstName || guest.firstName.length > 80) errors.firstName = 'Please enter your first name.';
-    if (!guest.lastName || guest.lastName.length > 80) errors.lastName = 'Please enter your last name.';
-    if (!EMAIL.test(guest.email) || guest.email.length > 254) errors.email = 'Please enter a valid email address.';
+    if (!guest.firstName || guest.firstName.length > 80)
+      errors.firstName = 'Please enter your first name.';
+    if (!guest.lastName || guest.lastName.length > 80)
+      errors.lastName = 'Please enter your last name.';
+    if (!EMAIL.test(guest.email) || guest.email.length > 254)
+      errors.email = 'Please enter a valid email address.';
     if (!PHONE.test(guest.phoneNumber)) errors.phoneNumber = 'Please enter a valid phone number.';
 
     const billingAddress = {
@@ -54,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       zipCode: text(body.zipCode),
       country: text(body.country),
     };
-    (['streetAddress', 'city', 'state', 'zipCode', 'country'] as const).forEach((key) => {
+    (['streetAddress', 'city', 'state', 'zipCode', 'country'] as const).forEach(key => {
       if (!billingAddress[key] || billingAddress[key].length > 120) {
         errors[key] = 'Please complete your billing address.';
       }
@@ -118,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: `${property.name}, ${checkIn} to ${checkOut}`,
           metadata: { reference, propertySlug: property.slug },
         },
-        { idempotencyKey: `booking-${reference}` },
+        { idempotencyKey: `booking-${reference}` }
       );
       await attachPaymentIntent(reference, paymentIntent.id);
 

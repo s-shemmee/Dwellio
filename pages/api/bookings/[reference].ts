@@ -46,7 +46,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       firstName: booking.guest.firstName,
     });
   } catch (err) {
-    console.error('GET /api/bookings/[reference] failed:', err instanceof Error ? err.message : err);
+    console.error(
+      'GET /api/bookings/[reference] failed:',
+      err instanceof Error ? err.message : err
+    );
     return res.status(500).json({ message: 'Something went wrong. Please try again.' });
   }
 }
