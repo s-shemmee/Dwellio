@@ -22,8 +22,7 @@ const Button: React.FC<ExtendedButtonProps> = ({
 
   const variants = {
     primary: 'bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-teal-600',
-    secondary:
-      'bg-black/80 text-white hover:bg-black focus-visible:ring-black',
+    secondary: 'bg-black/80 text-white hover:bg-black focus-visible:ring-black',
   };
 
   return (
