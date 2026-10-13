@@ -37,11 +37,11 @@ const Footer = () => {
             aria-label="Footer"
             className="grid w-full grid-cols-2 gap-8 sm:grid-cols-3 md:gap-12 lg:flex lg:w-auto lg:gap-16 lg:justify-end"
           >
-            {columns.map((col) => (
+            {columns.map(col => (
               <div key={col.title}>
                 <h2 className="mb-2 font-semibold">{col.title}</h2>
                 <ul className="space-y-1 text-gray-300">
-                  {col.links.map((label) => (
+                  {col.links.map(label => (
                     <li key={label}>
                       <Link href="#" className={`transition hover:text-white ${linkFocus}`}>
                         {label}
@@ -62,7 +62,7 @@ const Footer = () => {
             </Link>
           </p>
           <ul className="flex flex-wrap justify-center gap-4 mt-4 sm:mt-0">
-            {legalLinks.map((label) => (
+            {legalLinks.map(label => (
               <li key={label}>
                 <Link href="#" className={`hover:text-white ${linkFocus}`}>
                   {label}

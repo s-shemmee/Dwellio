@@ -29,23 +29,15 @@ const categories = [
 
 const AUTH_ENABLED = false;
 
-const AuthButton = ({
-  label,
-  className,
-}: {
-  label: string;
-  className: string;
-}) => (
+const AuthButton = ({ label, className }: { label: string; className: string }) => (
   <button
     type="button"
     aria-disabled={!AUTH_ENABLED}
     title={AUTH_ENABLED ? undefined : 'Coming soon'}
-    onClick={(e) => {
+    onClick={e => {
       if (!AUTH_ENABLED) e.preventDefault();
     }}
-    className={`${className} ${
-      AUTH_ENABLED ? '' : 'opacity-60 cursor-not-allowed'
-    }`}
+    className={`${className} ${AUTH_ENABLED ? '' : 'opacity-60 cursor-not-allowed'}`}
   >
     {label}
   </button>
@@ -69,11 +61,7 @@ const CategoryItem = ({
       aria-pressed={active}
       className={`flex flex-col items-center cursor-pointer pb-2 relative group shrink-0
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm
-        ${
-          active
-            ? 'text-gray-900 border-b-2 border-teal-600'
-            : 'text-gray-600 hover:text-gray-900'
-        }
+        ${active ? 'text-gray-900 border-b-2 border-teal-600' : 'text-gray-600 hover:text-gray-900'}
         transition-colors duration-200`}
     >
       <span className="flex items-center justify-center w-6 h-6 mb-1">
@@ -89,13 +77,7 @@ const CategoryItem = ({
   );
 };
 
-const GuestStepper = ({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (next: number) => void;
-}) => (
+const GuestStepper = ({ value, onChange }: { value: number; onChange: (next: number) => void }) => (
   <div className="flex items-center gap-2 shrink-0">
     <button
       type="button"
@@ -107,10 +89,7 @@ const GuestStepper = ({
       <Minus className="w-3 h-3" aria-hidden="true" />
     </button>
 
-    <span
-      className="w-5 text-sm font-semibold text-center shrink-0"
-      aria-live="polite"
-    >
+    <span className="w-5 text-sm font-semibold text-center shrink-0" aria-live="polite">
       {value}
     </span>
 
@@ -195,10 +174,7 @@ const Header = () => {
     if (!el) return;
 
     const update = () => {
-      document.documentElement.style.setProperty(
-        '--header-height',
-        `${el.offsetHeight}px`
-      );
+      document.documentElement.style.setProperty('--header-height', `${el.offsetHeight}px`);
     };
 
     update();
@@ -215,13 +191,7 @@ const Header = () => {
     <>
       <div className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-center text-white bg-teal-600">
         <div className="flex items-center gap-2 mx-auto sm:gap-4">
-          <Image
-            src="/assets/icons/Case.svg"
-            width={20}
-            height={20}
-            alt=""
-            aria-hidden="true"
-          />
+          <Image src="/assets/icons/Case.svg" width={20} height={20} alt="" aria-hidden="true" />
 
           <span className="text-xs sm:text-sm">
             Overseas trip? Get the latest information on travel guides
@@ -236,10 +206,7 @@ const Header = () => {
         </div>
       </div>
 
-      <header
-        ref={headerRef}
-        className="sticky top-0 z-50 w-full font-sans bg-white shadow-sm"
-      >
+      <header ref={headerRef} className="sticky top-0 z-50 w-full font-sans bg-white shadow-sm">
         {/* Main header */}
         <div className="flex items-center justify-between gap-3 px-4 py-4 bg-white sm:px-6 md:px-8 lg:px-10">
           {/* Logo */}
@@ -260,10 +227,7 @@ const Header = () => {
           >
             <div className="flex items-center min-w-0 text-gray-600 divide-x divide-gray-100 grow">
               <div className="flex-1 min-w-0 px-4 text-sm font-semibold">
-                <label
-                  htmlFor="search-location"
-                  className="block text-black"
-                >
+                <label htmlFor="search-location" className="block text-black">
                   Location
                 </label>
 
@@ -271,7 +235,7 @@ const Header = () => {
                   id="search-location"
                   type="text"
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={e => setLocation(e.target.value)}
                   placeholder="Search destination"
                   className="w-full min-w-0 text-gray-500 placeholder-gray-400 truncate outline-none"
                 />
@@ -286,7 +250,7 @@ const Header = () => {
                   id="search-checkin"
                   type="date"
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
+                  onChange={e => setCheckIn(e.target.value)}
                   className="text-gray-500 outline-none w-29"
                 />
               </div>
@@ -300,7 +264,7 @@ const Header = () => {
                   id="search-checkout"
                   type="date"
                   value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
+                  onChange={e => setCheckOut(e.target.value)}
                   className="text-gray-500 outline-none w-29"
                 />
               </div>
@@ -308,10 +272,7 @@ const Header = () => {
               <div className="px-4 text-sm font-semibold shrink-0">
                 <span className="block text-black">People</span>
 
-                <GuestStepper
-                  value={guests}
-                  onChange={setGuests}
-                />
+                <GuestStepper value={guests} onChange={setGuests} />
               </div>
             </div>
 
@@ -336,10 +297,7 @@ const Header = () => {
               {location || 'Search destination'}
             </span>
 
-            <Search
-              className="w-5 h-5 ml-2 shrink-0 text-amber-600"
-              aria-hidden="true"
-            />
+            <Search className="w-5 h-5 ml-2 shrink-0 text-amber-600" aria-hidden="true" />
           </button>
 
           {/* Desktop auth */}
@@ -367,10 +325,7 @@ const Header = () => {
               aria-controls="mobile-menu-panel"
               className="p-2 rounded-full hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
             >
-              <Menu
-                className="w-6 h-6 text-gray-600"
-                aria-hidden="true"
-              />
+              <Menu className="w-6 h-6 text-gray-600" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -430,7 +385,7 @@ const Header = () => {
                 id="mobile-location"
                 type="text"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={e => setLocation(e.target.value)}
                 placeholder="Search destination"
                 className="w-full px-4 py-3 border border-gray-300 outline-none rounded-xl focus:border-teal-600"
               />
@@ -449,7 +404,7 @@ const Header = () => {
                   id="mobile-checkin"
                   type="date"
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
+                  onChange={e => setCheckIn(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 outline-none rounded-xl focus:border-teal-600"
                 />
               </div>
@@ -466,21 +421,16 @@ const Header = () => {
                   id="mobile-checkout"
                   type="date"
                   value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
+                  onChange={e => setCheckOut(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 outline-none rounded-xl focus:border-teal-600"
                 />
               </div>
             </div>
 
             <div className="flex items-center justify-between px-4 py-3 border border-gray-300 rounded-xl">
-              <span className="text-sm font-semibold text-black">
-                Guests
-              </span>
+              <span className="text-sm font-semibold text-black">Guests</span>
 
-              <GuestStepper
-                value={guests}
-                onChange={setGuests}
-              />
+              <GuestStepper value={guests} onChange={setGuests} />
             </div>
 
             <button
@@ -535,9 +485,7 @@ const Header = () => {
               className="w-full px-4 py-3 text-sm font-semibold text-white bg-teal-600 rounded-full shadow-md hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
             />
 
-            <p className="text-sm text-gray-600">
-              Accounts are coming soon.
-            </p>
+            <p className="text-sm text-gray-600">Accounts are coming soon.</p>
           </div>
         </div>
       )}
