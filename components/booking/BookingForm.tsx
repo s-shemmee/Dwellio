@@ -22,11 +22,43 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 const SMS_OPT_IN_DEFAULT = false;
 
 const COUNTRIES = [
-  'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France',
-  'Germany', 'Ghana', 'Greece', 'India', 'Indonesia', 'Ireland', 'Italy', 'Japan', 'Kenya',
-  'Malaysia', 'Mexico', 'Morocco', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway',
-  'Portugal', 'Saudi Arabia', 'Singapore', 'South Africa', 'South Korea', 'Spain', 'Sweden',
-  'Switzerland', 'Tanzania', 'Thailand', 'Turkey', 'United Arab Emirates', 'United Kingdom',
+  'Australia',
+  'Austria',
+  'Belgium',
+  'Brazil',
+  'Canada',
+  'Denmark',
+  'Egypt',
+  'France',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'India',
+  'Indonesia',
+  'Ireland',
+  'Italy',
+  'Japan',
+  'Kenya',
+  'Malaysia',
+  'Mexico',
+  'Morocco',
+  'Netherlands',
+  'New Zealand',
+  'Nigeria',
+  'Norway',
+  'Portugal',
+  'Saudi Arabia',
+  'Singapore',
+  'South Africa',
+  'South Korea',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'Tanzania',
+  'Thailand',
+  'Turkey',
+  'United Arab Emirates',
+  'United Kingdom',
   'United States',
 ];
 
@@ -62,8 +94,16 @@ const initialValues: Values = {
 
 // Visual order, used to focus the first invalid field.
 const FIELD_ORDER: (keyof Values)[] = [
-  'firstName', 'lastName', 'email', 'phoneNumber',
-  'streetAddress', 'apartment', 'city', 'state', 'zipCode', 'country',
+  'firstName',
+  'lastName',
+  'email',
+  'phoneNumber',
+  'streetAddress',
+  'apartment',
+  'city',
+  'state',
+  'zipCode',
+  'country',
 ];
 
 /* ------------------------------ validation ------------------------------ */
@@ -139,12 +179,31 @@ interface FieldProps {
 }
 
 const TextField: React.FC<FieldProps> = ({
-  id, label, value, onChange, onBlur, error, type = 'text', autoComplete, inputMode,
-  maxLength, placeholder, optional, variant = 'stacked',
+  id,
+  label,
+  value,
+  onChange,
+  onBlur,
+  error,
+  type = 'text',
+  autoComplete,
+  inputMode,
+  maxLength,
+  placeholder,
+  optional,
+  variant = 'stacked',
 }) => {
   const errorId = `${id}-error`;
   const common = {
-    id, type, value, onChange, onBlur, autoComplete, inputMode, maxLength, placeholder,
+    id,
+    type,
+    value,
+    onChange,
+    onBlur,
+    autoComplete,
+    inputMode,
+    maxLength,
+    placeholder,
     'aria-invalid': Boolean(error),
     'aria-describedby': error ? errorId : undefined,
   };
@@ -237,8 +296,8 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
   const [session, setSession] = useState<{ reference: string; clientSecret: string } | null>(null);
 
   const setField = (name: TextKey, value: string) => {
-    setValues((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev));
+    setValues(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => (prev[name] ? { ...prev, [name]: undefined } : prev));
   };
 
   const onText = (name: TextKey) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -246,7 +305,7 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
 
   const onBlur = (name: keyof Values) => () => {
     if (name !== 'smsUpdates' && !values[name]) return; // don't nag while tabbing through
-    setErrors((prev) => ({ ...prev, [name]: validate(values)[name] }));
+    setErrors(prev => ({ ...prev, [name]: validate(values)[name] }));
   };
 
   const fieldProps = (name: TextKey, label: string) => ({
@@ -259,7 +318,7 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
   });
 
   const onCard = (field: CardField) => (event: CardEvent) =>
-    setCard((prev) => ({
+    setCard(prev => ({
       ...prev,
       [field]: { complete: event.complete, error: event.error?.message ?? '' },
     }));
@@ -285,14 +344,14 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
     }
 
     const found = validate(values);
-    const firstInvalid = FIELD_ORDER.find((key) => found[key]);
-    const incomplete = (['number', 'expiry', 'cvc'] as const).filter((f) => !card[f].complete);
+    const firstInvalid = FIELD_ORDER.find(key => found[key]);
+    const incomplete = (['number', 'expiry', 'cvc'] as const).filter(f => !card[f].complete);
 
     if (firstInvalid || incomplete.length > 0) {
       setErrors(found);
-      setCard((prev) => {
+      setCard(prev => {
         const next = { ...prev };
-        incomplete.forEach((f) => {
+        incomplete.forEach(f => {
           next[f] = { ...prev[f], error: prev[f].error || CARD_REQUIRED[f] };
         });
         return next;
@@ -355,20 +414,28 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
 
       if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
         redirected = true;
-        await router.push(`/booking/confirmation?reference=${encodeURIComponent(current.reference)}`);
+        await router.push(
+          `/booking/confirmation?reference=${encodeURIComponent(current.reference)}`
+        );
         return;
       }
       setFormError('Your payment was not completed. Please try again.');
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data && typeof err.response.data.message === 'string') {
+      if (
+        axios.isAxiosError(err) &&
+        err.response?.data &&
+        typeof err.response.data.message === 'string'
+      ) {
         const serverErrors = (err.response.data.errors ?? {}) as Record<string, string>;
         const fieldErrors: Errors = {};
-        (Object.keys(initialValues) as (keyof Values)[]).forEach((key) => {
+        (Object.keys(initialValues) as (keyof Values)[]).forEach(key => {
           if (serverErrors[key]) fieldErrors[key] = serverErrors[key];
         });
         setErrors(fieldErrors);
         setFormError(
-          Object.keys(fieldErrors).length > 0 ? 'Please fix the highlighted fields.' : err.response.data.message,
+          Object.keys(fieldErrors).length > 0
+            ? 'Please fix the highlighted fields.'
+            : err.response.data.message
         );
       } else {
         setFormError('We couldn’t submit your booking. Please check your details and try again.');
@@ -398,7 +465,7 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
           <input
             type="checkbox"
             checked={values.smsUpdates}
-            onChange={(e) => setValues((prev) => ({ ...prev, smsUpdates: e.target.checked }))}
+            onChange={e => setValues(prev => ({ ...prev, smsUpdates: e.target.checked }))}
             className="w-5 h-5 mt-0.5 accent-brand-dark shrink-0"
           />
           <span>Receive text message updates about your booking. Message rates may apply.</span>
@@ -409,8 +476,9 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
       <fieldset className={sectionClasses}>
         <legend className="mb-1 text-2xl font-semibold text-gray-900">Pay with</legend>
         <p className="mb-4 text-sm text-gray-600">
-          Test mode: no real money moves. Use card <span className="font-mono">4242 4242 4242 4242</span>,
-          any future expiry and any 3-digit code.
+          Test mode: no real money moves. Use card{' '}
+          <span className="font-mono">4242 4242 4242 4242</span>, any future expiry and any 3-digit
+          code.
         </p>
 
         <div className="relative mb-4">
@@ -484,9 +552,17 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
             optional
             autoComplete="billing address-line2"
           />
-          <TextField {...fieldProps('city', 'City')} variant="cell" autoComplete="billing address-level2" />
+          <TextField
+            {...fieldProps('city', 'City')}
+            variant="cell"
+            autoComplete="billing address-level2"
+          />
           <div className="grid grid-cols-2 divide-x divide-gray-300">
-            <TextField {...fieldProps('state', 'State')} variant="cell" autoComplete="billing address-level1" />
+            <TextField
+              {...fieldProps('state', 'State')}
+              variant="cell"
+              autoComplete="billing address-level1"
+            />
             <TextField
               {...fieldProps('zipCode', 'Zip Code')}
               variant="cell"
@@ -504,9 +580,9 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
               <select
                 id={id('country')}
                 value={values.country}
-                onChange={(e) => {
-                  setValues((prev) => ({ ...prev, country: e.target.value }));
-                  setErrors((prev) => ({ ...prev, country: undefined }));
+                onChange={e => {
+                  setValues(prev => ({ ...prev, country: e.target.value }));
+                  setErrors(prev => ({ ...prev, country: undefined }));
                 }}
                 aria-invalid={Boolean(errors.country)}
                 aria-describedby={errors.country ? `${id('country')}-error` : undefined}
@@ -514,7 +590,7 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
                 className="w-full p-0 pr-8 text-base text-gray-900 bg-transparent border-0 appearance-none focus:outline-none focus:ring-0"
               >
                 <option value="">Select country</option>
-                {COUNTRIES.map((c) => (
+                {COUNTRIES.map(c => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -535,7 +611,10 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
 
       <div className="pt-8 mt-8 border-t border-gray-200">
         {formError && (
-          <p role="alert" className="px-3 py-2 mb-4 text-red-700 border border-red-200 rounded-md bg-red-50">
+          <p
+            role="alert"
+            className="px-3 py-2 mb-4 text-red-700 border border-red-200 rounded-md bg-red-50"
+          >
             {formError}
           </p>
         )}
@@ -552,7 +631,7 @@ const BookingFormInner: React.FC<BookingFormProps> = ({ booking, children }) => 
   );
 };
 
-const BookingForm: React.FC<BookingFormProps> = (props) => {
+const BookingForm: React.FC<BookingFormProps> = props => {
   if (!stripePromise) {
     return (
       <p role="alert" className="px-4 py-3 text-red-700 border border-red-200 rounded-lg bg-red-50">

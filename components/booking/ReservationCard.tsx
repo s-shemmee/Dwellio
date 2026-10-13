@@ -29,7 +29,11 @@ const addDays = (iso: string, days: number) => {
 const inputClasses =
   'w-full px-3 py-2.5 text-gray-900 bg-white border rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:border-teal-700';
 
-const ReservationCard: React.FC<ReservationCardProps> = ({ price, propertyId, discountPercent = 0 }) => {
+const ReservationCard: React.FC<ReservationCardProps> = ({
+  price,
+  propertyId,
+  discountPercent = 0,
+}) => {
   const router = useRouter();
   const idPrefix = useId();
   const checkInRef = useRef<HTMLInputElement>(null);
@@ -97,7 +101,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({ price, propertyId, di
           type="date"
           value={checkIn}
           min={today || undefined}
-          onChange={(e) => setCheckIn(e.target.value)}
+          onChange={e => setCheckIn(e.target.value)}
           aria-invalid={Boolean(errors.checkIn)}
           aria-describedby={errors.checkIn ? `${ids.checkIn}-error` : undefined}
           className={`${inputClasses} ${errors.checkIn ? 'border-red-500' : 'border-gray-300'}`}
@@ -119,7 +123,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({ price, propertyId, di
           type="date"
           value={checkOut}
           min={checkIn ? addDays(checkIn, 1) : today || undefined}
-          onChange={(e) => setCheckOut(e.target.value)}
+          onChange={e => setCheckOut(e.target.value)}
           aria-invalid={Boolean(errors.checkOut)}
           aria-describedby={errors.checkOut ? `${ids.checkOut}-error` : undefined}
           className={`${inputClasses} ${errors.checkOut ? 'border-red-500' : 'border-gray-300'}`}
@@ -161,7 +165,8 @@ const ReservationCard: React.FC<ReservationCardProps> = ({ price, propertyId, di
         ) : (
           <p className="text-sm text-gray-600">
             Select your dates to see the total.
-            {discountPercent > 0 && ` Stays of ${WEEKLY_DISCOUNT_MIN_NIGHTS}+ nights get ${discountPercent}% off.`}
+            {discountPercent > 0 &&
+              ` Stays of ${WEEKLY_DISCOUNT_MIN_NIGHTS}+ nights get ${discountPercent}% off.`}
           </p>
         )}
       </div>
@@ -176,7 +181,10 @@ const ReservationCard: React.FC<ReservationCardProps> = ({ price, propertyId, di
       </button>
 
       {submitError && (
-        <p role="alert" className="px-3 py-2 text-sm text-red-700 border border-red-200 rounded-md bg-red-50">
+        <p
+          role="alert"
+          className="px-3 py-2 text-sm text-red-700 border border-red-200 rounded-md bg-red-50"
+        >
           {submitError}
         </p>
       )}
